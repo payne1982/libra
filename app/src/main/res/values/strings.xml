@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Libra</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_sync">Scale Sync</string>
+    <string name="notification_sync_title">Libra</string>
+    <string name="notification_sync_text">Connecting to scale…</string>
+    <string name="notification_downloading">Downloading history…</string>
+    <string name="notification_new_measurement">New measurement…</string>
+    <string name="notification_live_weight">Live weight…</string>
+    <string name="notification_cancelled">Cancelled</string>
+    <string name="notification_connecting_device">Connected to %1$s, starting protocol…</string>
+    <string name="notification_profile_deleted">Profile deleted. Create your profile.</string>
+    <string name="notification_step_on_scale">Step on the scale…</string>
+
+    <!-- Common -->
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_retry">Retry</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_delete">Delete</string>
+
+    <!-- Navigation -->
+    <string name="nav_history">History</string>
+    <string name="nav_charts">Charts</string>
+    <string name="nav_sync">Sync</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Sync screen -->
+    <string name="sync_title">Scale</string>
+    <string name="btn_sync_history">Sync history</string>
+    <string name="desc_sync_history">Download measurements stored on the scale</string>
+    <string name="btn_new_measurement">New measurement</string>
+    <string name="desc_new_measurement">Step on the scale and choose whether to save the result</string>
+    <string name="btn_live_weight">Live weight</string>
+    <string name="desc_live_weight">View weight in real time without saving</string>
+    <string name="status_scanning">Searching for scale…</string>
+    <string name="status_connecting">Connecting to %1$s…</string>
+    <string name="title_select_profile">Select your profile</string>
+    <string name="label_profiles_found">Profiles found on scale:</string>
+    <string name="label_user_id">ID: %1$d</string>
+    <string name="btn_use">Use</string>
+    <string name="btn_create_profile">Create new profile</string>
+    <string name="desc_create_profile">Use the profile configured in Settings</string>
+    <string name="status_downloading">Downloading history…</string>
+    <string name="status_downloading_progress">%1$d / %2$d packets  •  ~%3$d measurements</string>
+    <string name="status_downloading_in_progress">Downloading history…</string>
+    <string name="status_connected">Connected. Step on the scale.</string>
+    <string name="status_stabilizing">Stabilizing, processing…</string>
+    <string name="status_measuring">Measuring…</string>
+    <string name="label_body_comp">Fat: %1$.1f%%  •  Muscle: %2$.1f%%  •  BMI: %3$.1f</string>
+    <string name="btn_exit_without_saving">Exit without saving</string>
+    <string name="fmt_weight_kg">%1$.1f kg</string>
+    <string name="status_saved">Saved: %1$.1f kg</string>
+    <string name="status_already_present">Measurement already present (%1$.1f kg)</string>
+    <string name="status_sync_complete_none">History updated.\nNo new measurements.</string>
+    <string name="status_sync_complete_count">History updated.\n%1$d new measurements.</string>
+    <string name="status_done">Done!</string>
+
+    <!-- History screen -->
+    <string name="history_title">Measurement history</string>
+    <string name="cd_export_json">Export JSON</string>
+    <string name="cd_export_csv">Export CSV</string>
+    <string name="cd_import">Import</string>
+    <string name="toast_no_data">No data to export</string>
+    <string name="toast_import_success">%1$d measurements imported</string>
+    <string name="toast_import_none">No measurements found in file</string>
+    <string name="share_chooser_title">Export Libra data</string>
+    <string name="history_empty">No measurements.\nUse Sync to download from scale.</string>
+    <string name="dialog_delete_title">Delete?</string>
+    <string name="dialog_delete_text">This measurement will be permanently deleted.</string>
+    <string name="label_fat_muscle">Fat: %1$.1f%%  •  Muscle: %2$.1f%%</string>
+    <string name="metric_bmi">BMI</string>
+    <string name="metric_fat_mass">Fat mass</string>
+    <string name="metric_muscle_mass">Muscle mass</string>
+    <string name="metric_bone_mass">Bone mass</string>
+    <string name="metric_body_water">Body water</string>
+    <string name="metric_bmr">BMR</string>
+    <string name="metric_amr">AMR</string>
+    <string name="metric_impedance">Impedance</string>
+    <string name="cd_delete">Delete</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_weight_filter">Weight filter</string>
+    <string name="settings_weight_filter_desc">Measurements outside this range are ignored during sync.</string>
+    <string name="settings_weight_min">Min (kg)</string>
+    <string name="settings_weight_max">Max (kg)</string>
+    <string name="btn_save_range">Save range</string>
+    <string name="settings_unit">Unit of measurement</string>
+    <string name="settings_show_kg">Show in kg</string>
+    <string name="settings_unit_kg">Active unit: kg</string>
+    <string name="settings_unit_lb">Active unit: lb</string>
+    <string name="settings_user_profile">User profile</string>
+    <string name="settings_user_profile_desc">The scale uses this data to calculate fat, muscle and BMI. Initials appear on the scale display.</string>
+    <string name="settings_initials">Initials (3 letters, e.g. JOH)</string>
+    <string name="settings_height">Height (cm)</string>
+    <string name="settings_gender">Gender</string>
+    <string name="settings_gender_male">Male</string>
+    <string name="settings_gender_female">Female</string>
+    <string name="settings_birth_year">Year</string>
+    <string name="settings_birth_month">Month</string>
+    <string name="settings_birth_day">Day</string>
+    <string name="settings_activity_level">Activity level: %1$d (1=sedentary … 5=very active)</string>
+    <string name="btn_save_profile">Save profile</string>
+    <string name="btn_forget_scale_profile">Forget scale profile (ID: %1$d)</string>
+
+    <!-- Charts screen -->
+    <string name="chart_title">Charts</string>
+    <string name="chart_no_data">No data in the selected period.</string>
+    <string name="chart_weight_kg">Weight (kg)</string>
+    <string name="chart_fat_pct">Fat (%)</string>
+    <string name="chart_muscle_pct">Muscle (%)</string>
+    <string name="chart_bone_pct">Bone (%)</string>
+
+    <!-- Chart periods -->
+    <string name="period_7_days">7 days</string>
+    <string name="period_30_days">30 days</string>
+    <string name="period_3_months">3 months</string>
+    <string name="period_6_months">6 months</string>
+    <string name="period_1_year">1 year</string>
+    <string name="period_all">All</string>
+
+    <!-- Live weight screen -->
+    <string name="live_weight_title">Live weight</string>
+    <string name="cd_back">Back</string>
+    <string name="status_stable">Stable</string>
+    <string name="status_waiting">Waiting…</string>
+    <string name="status_measurement_complete">Measurement complete!</string>
+    <string name="status_connecting_short">Connecting…</string>
+    <string name="status_step_on_scale">Step on the scale</string>
+
+    <!-- Language settings -->
+    <string name="settings_language">Language</string>
+    <string name="language_system">System default</string>
+    <string name="language_english">English</string>
+    <string name="language_italian">Italiano</string>
+
+    <!-- Error messages -->
+    <string name="error_bluetooth_unavailable">Bluetooth not available</string>
+    <string name="error_scale_not_found">Scale not found</string>
+    <string name="error_connection_lost">Connection lost</string>
+    <string name="error_services_not_found">Services not found</string>
+    <string name="error_ffe1_not_found">FFE1 characteristic not found</string>
+    <string name="error_delete_profile">Profile deletion error (status=%1$d)</string>
+    <string name="error_create_profile">Profile creation error (status=%1$d)</string>
+    <string name="error_measurement_rejected">Scale rejected measurement (%1$d)</string>
+</resources>

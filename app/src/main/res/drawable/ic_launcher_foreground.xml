@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Pivot circle -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M54,29 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0"/>
+
+    <!-- Beam -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M30,33 L78,33 L78,37 L30,37 Z"/>
+
+    <!-- Stand -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M52,34 L52,74 L56,74 L56,34 Z"/>
+
+    <!-- Base -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M38,74 L70,74 L70,79 L38,79 Z"/>
+
+    <!-- Left pan strings -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M30,37 L23,54 M30,37 L38,54"/>
+
+    <!-- Left pan -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M19,54 Q30,63 41,54 L41,57 Q30,66 19,57 Z"/>
+
+    <!-- Right pan strings -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFD54F"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M78,37 L70,54 M78,37 L86,54"/>
+
+    <!-- Right pan -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M66,54 Q78,63 90,54 L90,57 Q78,66 66,57 Z"/>
+
+</vector>

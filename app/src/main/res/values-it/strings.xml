@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Libra</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_sync">Sincronizzazione Bilancia</string>
+    <string name="notification_sync_title">Libra</string>
+    <string name="notification_sync_text">Connessione alla bilancia in corso…</string>
+    <string name="notification_downloading">Scaricamento storico…</string>
+    <string name="notification_new_measurement">Nuova pesata…</string>
+    <string name="notification_live_weight">Peso in diretta…</string>
+    <string name="notification_cancelled">Annullato</string>
+    <string name="notification_connecting_device">Connesso a %1$s, avvio protocollo…</string>
+    <string name="notification_profile_deleted">Profilo eliminato. Crea il tuo profilo.</string>
+    <string name="notification_step_on_scale">Sali sulla bilancia…</string>
+
+    <!-- Common -->
+    <string name="btn_cancel">Annulla</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_save">Salva</string>
+    <string name="btn_retry">Riprova</string>
+    <string name="btn_close">Chiudi</string>
+    <string name="btn_delete">Elimina</string>
+
+    <!-- Navigation -->
+    <string name="nav_history">Storico</string>
+    <string name="nav_charts">Grafici</string>
+    <string name="nav_sync">Sync</string>
+    <string name="nav_settings">Impostazioni</string>
+
+    <!-- Sync screen -->
+    <string name="sync_title">Bilancia</string>
+    <string name="btn_sync_history">Sincronizza storico</string>
+    <string name="desc_sync_history">Scarica le pesate memorizzate dalla bilancia</string>
+    <string name="btn_new_measurement">Nuova pesata</string>
+    <string name="desc_new_measurement">Sali sulla bilancia e scegli se salvare il risultato</string>
+    <string name="btn_live_weight">Peso in diretta</string>
+    <string name="desc_live_weight">Visualizza il peso in tempo reale senza salvare</string>
+    <string name="status_scanning">Ricerca bilancia in corso…</string>
+    <string name="status_connecting">Connessione a %1$s…</string>
+    <string name="title_select_profile">Seleziona il tuo profilo</string>
+    <string name="label_profiles_found">Profili trovati sulla bilancia:</string>
+    <string name="label_user_id">ID: %1$d</string>
+    <string name="btn_use">Usa</string>
+    <string name="btn_create_profile">Crea nuovo profilo</string>
+    <string name="desc_create_profile">Usa il profilo configurato nelle Impostazioni</string>
+    <string name="status_downloading">Scaricamento storico…</string>
+    <string name="status_downloading_progress">%1$d / %2$d pacchetti  •  ~%3$d misurazioni</string>
+    <string name="status_downloading_in_progress">Scaricamento storico in corso…</string>
+    <string name="status_connected">Connesso. Sali sulla bilancia.</string>
+    <string name="status_stabilizing">Stabilizzato, elaborazione…</string>
+    <string name="status_measuring">Misurazione in corso…</string>
+    <string name="label_body_comp">Grasso: %1$.1f%%  •  Muscoli: %2$.1f%%  •  BMI: %3$.1f</string>
+    <string name="btn_exit_without_saving">Esci senza salvare</string>
+    <string name="fmt_weight_kg">%1$.1f kg</string>
+    <string name="status_saved">Salvata: %1$.1f kg</string>
+    <string name="status_already_present">Misurazione già presente (%1$.1f kg)</string>
+    <string name="status_sync_complete_none">Storico aggiornato.\nNessuna nuova misurazione.</string>
+    <string name="status_sync_complete_count">Storico aggiornato.\n%1$d nuove misurazioni.</string>
+    <string name="status_done">Completato!</string>
+
+    <!-- History screen -->
+    <string name="history_title">Storico misurazioni</string>
+    <string name="cd_export_json">Esporta JSON</string>
+    <string name="cd_export_csv">Esporta CSV</string>
+    <string name="cd_import">Importa</string>
+    <string name="toast_no_data">Nessun dato da esportare</string>
+    <string name="toast_import_success">%1$d misurazioni importate</string>
+    <string name="toast_import_none">Nessuna misurazione trovata nel file</string>
+    <string name="share_chooser_title">Esporta dati Libra</string>
+    <string name="history_empty">Nessuna misurazione.\nUsa Sync per scaricarne dalla bilancia.</string>
+    <string name="dialog_delete_title">Eliminare?</string>
+    <string name="dialog_delete_text">Questa misurazione verrà eliminata definitivamente.</string>
+    <string name="label_fat_muscle">Grasso: %1$.1f%%  •  Muscoli: %2$.1f%%</string>
+    <string name="metric_bmi">BMI</string>
+    <string name="metric_fat_mass">Massa grassa</string>
+    <string name="metric_muscle_mass">Massa muscolare</string>
+    <string name="metric_bone_mass">Massa ossea</string>
+    <string name="metric_body_water">Acqua corporea</string>
+    <string name="metric_bmr">BMR</string>
+    <string name="metric_amr">AMR</string>
+    <string name="metric_impedance">Impedenza</string>
+    <string name="cd_delete">Elimina</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_weight_filter">Filtro peso</string>
+    <string name="settings_weight_filter_desc">Le misurazioni fuori da questo range vengono ignorate durante la sync.</string>
+    <string name="settings_weight_min">Min (kg)</string>
+    <string name="settings_weight_max">Max (kg)</string>
+    <string name="btn_save_range">Salva range</string>
+    <string name="settings_unit">Unità di misura</string>
+    <string name="settings_show_kg">Mostra in kg</string>
+    <string name="settings_unit_kg">Unità attiva: kg</string>
+    <string name="settings_unit_lb">Unità attiva: lb</string>
+    <string name="settings_user_profile">Profilo utente</string>
+    <string name="settings_user_profile_desc">La bilancia usa questi dati per calcolare grasso, muscoli e BMI. Le iniziali appaiono sul display della bilancia.</string>
+    <string name="settings_initials">Iniziali (3 lettere, es. MAR)</string>
+    <string name="settings_height">Altezza (cm)</string>
+    <string name="settings_gender">Sesso</string>
+    <string name="settings_gender_male">Uomo</string>
+    <string name="settings_gender_female">Donna</string>
+    <string name="settings_birth_year">Anno</string>
+    <string name="settings_birth_month">Mese</string>
+    <string name="settings_birth_day">Giorno</string>
+    <string name="settings_activity_level">Livello di attività: %1$d (1=sedentario … 5=molto attivo)</string>
+    <string name="btn_save_profile">Salva profilo</string>
+    <string name="btn_forget_scale_profile">Dimentica profilo bilancia (ID: %1$d)</string>
+
+    <!-- Charts screen -->
+    <string name="chart_title">Grafici</string>
+    <string name="chart_no_data">Nessun dato nel periodo selezionato.</string>
+    <string name="chart_weight_kg">Peso (kg)</string>
+    <string name="chart_fat_pct">Grasso (%)</string>
+    <string name="chart_muscle_pct">Muscoli (%)</string>
+    <string name="chart_bone_pct">Ossa (%)</string>
+
+    <!-- Chart periods -->
+    <string name="period_7_days">7 giorni</string>
+    <string name="period_30_days">30 giorni</string>
+    <string name="period_3_months">3 mesi</string>
+    <string name="period_6_months">6 mesi</string>
+    <string name="period_1_year">1 anno</string>
+    <string name="period_all">Tutto</string>
+
+    <!-- Live weight screen -->
+    <string name="live_weight_title">Peso in diretta</string>
+    <string name="cd_back">Indietro</string>
+    <string name="status_stable">Stabile</string>
+    <string name="status_waiting">In attesa…</string>
+    <string name="status_measurement_complete">Misurazione completa!</string>
+    <string name="status_connecting_short">Connessione…</string>
+    <string name="status_step_on_scale">Sali sulla bilancia</string>
+
+    <!-- Language settings -->
+    <string name="settings_language">Lingua</string>
+    <string name="language_system">Predefinito di sistema</string>
+    <string name="language_english">English</string>
+    <string name="language_italian">Italiano</string>
+
+    <!-- Error messages -->
+    <string name="error_bluetooth_unavailable">Bluetooth non disponibile</string>
+    <string name="error_scale_not_found">Bilancia non trovata</string>
+    <string name="error_connection_lost">Connessione persa</string>
+    <string name="error_services_not_found">Servizi non trovati</string>
+    <string name="error_ffe1_not_found">Caratteristica FFE1 non trovata</string>
+    <string name="error_delete_profile">Errore eliminazione profilo (status=%1$d)</string>
+    <string name="error_create_profile">Errore creazione profilo (status=%1$d)</string>
+    <string name="error_measurement_rejected">La bilancia ha rifiutato la misurazione (%1$d)</string>
+</resources>

@@ -1,0 +1,44 @@
+# Build outputs
+build/
+app/build/
+*/build/
+
+# Gradle internals
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local config (machine-specific, never commit)
+local.properties
+*.local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore & signing — NEVER commit
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
+
+# OS noise
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# Logs & profiling
+*.log
+*.hprof
+lint-results*/
+
+# Generated code (Room, KSP)
+app/src/main/java/**/generated/
