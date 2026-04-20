@@ -45,15 +45,15 @@ class LibraSyncService : Service() {
     private var ffe1Char: BluetoothGattCharacteristic? = null
     private val parser = LibraParser()
 
-    // ─── Modalità di funzionamento ────────────────────────────────────────────
+    // ─── Operating mode ───────────────────────────────────────────────────────
 
     private enum class ServiceMode {
-        SYNC,    // scarica storico dalla bilancia
-        MEASURE, // nuova pesata live, chiede all'utente se salvare
-        LIVE,    // peso in diretta senza salvare
+        SYNC,    // download history from scale
+        MEASURE, // live weighing, asks user whether to save
+        LIVE,    // live weight display without saving
     }
 
-    // ─── State machine protocollo ─────────────────────────────────────────────
+    // ─── Protocol state machine ────────────────────────────────────────────────
 
     private enum class ProtocolStep {
         INIT, WAIT_USER_LIST, WAIT_SETUP, DELETING_USER, CREATING_USER,
@@ -73,10 +73,10 @@ class LibraSyncService : Service() {
     private var writeIntent = WriteIntent.NONE
     private var cachedPrefs: AppPrefs? = null
 
-    // Misurazione in attesa di conferma utente (solo in modalità MEASURE)
+    // Pending measurement awaiting user confirmation (MEASURE mode only)
     private var pendingEntity: MeasurementEntity? = null
 
-    // Stato download storico (getUserMeasurements)
+    // History download state (getUserMeasurements)
     private var gumTotalSubPkts = 0
     private var gumDownloadedCount = 0
     private var gumCurrentTs = 0L
@@ -85,13 +85,13 @@ class LibraSyncService : Service() {
     private var gumCurrentBodyFat = 0f
     private var gumBoneMsb = 0
 
-    // Stato misurazioni sconosciute (getUnknownMeasurements + assignMeasurementToUser)
+    // Unknown measurements state (getUnknownMeasurements + assignMeasurementToUser)
     private data class UnknownMeasurement(val slotId: Int, val ts: Long, val weight: Float, val imp: Int)
     private val unknownPending = mutableListOf<UnknownMeasurement>()
     private var unknownTotalCount = 0
     private var unknownReceivedCount = 0
     private var unknownAssignIdx = 0
-    // Stato parziale per parsing risposta 0x4C (assign body comp)
+    // Partial state for 0x4C response parsing (assign body comp)
     private var assignBoneMsb = 0
     private var assignBodyFat = 0f
 
@@ -127,7 +127,7 @@ class LibraSyncService : Service() {
         data class UserSelection(val users: List<ScaleUser>, val canCreate: Boolean) : SyncState()
         data class Syncing(val received: Int = 0, val total: Int = 0) : SyncState()
         data class LiveWeight(val weightKg: Float, val stable: Boolean) : SyncState()
-        // Nuova pesata completata: attende decisione utente
+        // Completed weighing: awaiting user decision
         data class MeasurementPending(
             val weightKg: Float,
             val bodyFatPct: Float,
@@ -287,7 +287,7 @@ class LibraSyncService : Service() {
             btManager.adapter?.bluetoothLeScanner?.stopScan(this)
 
             _state.value = SyncState.Connecting(name)
-            updateNotification("Connessione a $name…")
+            updateNotification(getString(R.string.notification_connecting_device, name))
             result.device.connectGatt(this@LibraSyncService, false, gattCallback)
         }
     }
@@ -383,7 +383,7 @@ class LibraSyncService : Service() {
         writeFFE1(byteArrayOf(0xF6.toByte(), 0x01.toByte()))
     }
 
-    // ─── Setup complete: decide il passo successivo in base alla modalità ─────
+    // ─── Setup complete: decide next step based on mode ───────────────────────
 
     private fun onSetupComplete() {
         Log.d(TAG, "onSetupComplete: mode=$serviceMode userFound=$userFound scaleUsers=${scaleUsers.size} selectedUserId=$selectedUserId")
@@ -394,7 +394,7 @@ class LibraSyncService : Service() {
                     users = scaleUsers.toList(),
                     canCreate = scaleUsers.size < 8
                 )
-                updateNotification("Seleziona il tuo profilo sulla bilancia…")
+                updateNotification(getString(R.string.notification_select_profile))
             }
             !userFound -> {
                 Log.d(TAG, "→ createUser (no users on scale)")
@@ -404,7 +404,7 @@ class LibraSyncService : Service() {
             serviceMode == ServiceMode.SYNC -> {
                 Log.d(TAG, "→ getMeasurements for userId=$selectedUserId")
                 _state.value = SyncState.Syncing()
-                updateNotification("Scaricamento misurazioni…")
+                updateNotification(getString(R.string.notification_downloading))
                 protocolStep = ProtocolStep.GETTING_MEASUREMENTS
                 writeFFE1(buildGetMeasurementsCmd(selectedUserId))
             }
@@ -539,7 +539,7 @@ class LibraSyncService : Service() {
                     onMeasurementsDownloaded()
                 } else {
                     _state.value = SyncState.Syncing(received = 0, total = gumTotalSubPkts)
-                    updateNotification("Scaricamento 0/$gumTotalSubPkts sub-pacchetti…")
+                    updateNotification(getString(R.string.notification_downloading))
                 }
             }
 
@@ -703,7 +703,7 @@ class LibraSyncService : Service() {
         }
 
         _state.value = SyncState.Syncing(received = idx, total = gumTotalSubPkts)
-        updateNotification("Scaricamento $idx/$gumTotalSubPkts sub-pacchetti…")
+        updateNotification(getString(R.string.notification_downloading))
 
         if (idx == gumTotalSubPkts) {
             // Delay to let the ACK write complete before sending 0x46

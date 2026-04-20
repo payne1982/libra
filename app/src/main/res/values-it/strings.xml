@@ -14,6 +14,7 @@
     <string name="notification_connecting_device">Connesso a %1$s, avvio protocollo…</string>
     <string name="notification_profile_deleted">Profilo eliminato. Crea il tuo profilo.</string>
     <string name="notification_step_on_scale">Sali sulla bilancia…</string>
+    <string name="notification_select_profile">Seleziona il tuo profilo sulla bilancia…</string>
 
     <!-- Common -->
     <string name="btn_cancel">Annulla</string>
