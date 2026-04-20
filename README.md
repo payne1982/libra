@@ -36,4 +36,6 @@ APK output: `app/build/outputs/apk/debug/app-debug.apk`
 
 ## License
 
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
+
 This project is not affiliated with or endorsed by Adidas or Runtastic.
