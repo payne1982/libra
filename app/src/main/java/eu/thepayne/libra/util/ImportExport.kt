@@ -96,18 +96,18 @@ object ImportExport {
             if (cols.size < 12) return@mapNotNull null
             try {
                 MeasurementEntity(
-                    timestampMs = sdf.parse(cols[0])?.time ?: return@mapNotNull null,
-                    weightKg = cols[1].toFloat(),
-                    bodyFatPct = cols[2].toFloat(),
-                    bodyFatKg = cols[3].toFloat(),
-                    musclePct = cols[4].toFloat(),
-                    muscleMassKg = cols[5].toFloat(),
-                    boneMassKg = cols[6].toFloat(),
-                    bodyWaterPct = cols[7].toFloat(),
-                    bmi = cols[8].toFloat(),
-                    bmr = cols[9].toInt(),
-                    amr = cols[10].toInt(),
-                    impedanceOhm = cols[11].toInt(),
+                    timestampMs = sdf.parse(cols[0].trim())?.time ?: return@mapNotNull null,
+                    weightKg = cols[1].trim().toFloat(),
+                    bodyFatPct = cols[2].trim().toFloat(),
+                    bodyFatKg = cols[3].trim().toFloat(),
+                    musclePct = cols[4].trim().toFloat(),
+                    muscleMassKg = cols[5].trim().toFloat(),
+                    boneMassKg = cols[6].trim().toFloat(),
+                    bodyWaterPct = cols[7].trim().toFloat(),
+                    bmi = cols[8].trim().toFloat(),
+                    bmr = cols[9].trim().toInt(),
+                    amr = cols[10].trim().toInt(),
+                    impedanceOhm = cols[11].trim().toInt(),
                 )
             } catch (_: Exception) { null }
         }
@@ -117,10 +117,10 @@ object ImportExport {
         val text = contentResolver.openInputStream(uri)?.bufferedReader()?.readText() ?: return emptyList()
         val mimeType = contentResolver.getType(uri) ?: ""
         val name = uri.lastPathSegment ?: ""
-        return when {
-            mimeType == "text/csv" || name.endsWith(".csv", ignoreCase = true) -> parseCsv(text)
-            else -> parseImportedJson(text)
-        }
+        val isCsv = mimeType == "text/csv" || mimeType == "text/comma-separated-values"
+            || name.endsWith(".csv", ignoreCase = true)
+            || text.trimStart().startsWith("date,weightKg")
+        return if (isCsv) parseCsv(text) else parseImportedJson(text)
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
