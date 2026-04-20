@@ -71,6 +71,7 @@ class LibraSyncService : Service() {
     private var userFound = false
     private val scaleUsers = mutableListOf<ScaleUser>()
     private var writeIntent = WriteIntent.NONE
+    private var getUserListRetries = 0
     private var cachedPrefs: AppPrefs? = null
 
     // Pending measurement awaiting user confirmation (MEASURE mode only)
@@ -168,6 +169,8 @@ class LibraSyncService : Service() {
                 if (userId != -1L) handleUserSelected(userId)
             }
             ACTION_CREATE_USER -> {
+                _state.value = SyncState.Syncing()
+                updateNotification(getString(R.string.status_creating_profile))
                 protocolStep = ProtocolStep.CREATING_USER
                 scope.launch { sendCreateUser() }
             }
@@ -248,6 +251,7 @@ class LibraSyncService : Service() {
         userFound = false
         scaleUsers.clear()
         writeIntent = WriteIntent.NONE
+        getUserListRetries = 0
         gumTotalSubPkts = 0
         gumDownloadedCount = 0
         parser.reset()
@@ -289,6 +293,12 @@ class LibraSyncService : Service() {
             _state.value = SyncState.Connecting(name)
             updateNotification(getString(R.string.notification_connecting_device, name))
             result.device.connectGatt(this@LibraSyncService, false, gattCallback)
+        }
+
+        override fun onScanFailed(errorCode: Int) {
+            Log.d(TAG, "onScanFailed errorCode=$errorCode")
+            _state.value = SyncState.Error(getString(R.string.error_bluetooth_unavailable))
+            stopSelf()
         }
     }
 
@@ -356,7 +366,11 @@ class LibraSyncService : Service() {
             g: BluetoothGatt,
             characteristic: BluetoothGattCharacteristic
         ) {
-            if (Build.VERSION.SDK_INT < 33) handleData(characteristic.value)
+            if (Build.VERSION.SDK_INT < 33) {
+                val src = if (characteristic.uuid.toString().uppercase().contains("FFE2")) "FFE2" else "FFE1"
+                Log.d(TAG, "onCharacteristicChanged src=$src")
+                handleData(characteristic.value)
+            }
         }
 
         override fun onCharacteristicChanged(
@@ -364,6 +378,8 @@ class LibraSyncService : Service() {
             characteristic: BluetoothGattCharacteristic,
             value: ByteArray
         ) {
+            val src = if (characteristic.uuid.toString().uppercase().contains("FFE2")) "FFE2" else "FFE1"
+            Log.d(TAG, "onCharacteristicChanged src=$src")
             handleData(value)
         }
     }
@@ -429,9 +445,12 @@ class LibraSyncService : Service() {
 
         when {
             b0 == 0xF6 && protocolStep == ProtocolStep.INIT -> {
-                Log.d(TAG, "0xF6 init → getUserList")
+                Log.d(TAG, "0xF6 init → getUserList (200ms delay)")
                 protocolStep = ProtocolStep.WAIT_USER_LIST
-                writeFFE1(byteArrayOf(0xF7.toByte(), 0x33.toByte()))
+                scope.launch {
+                    delay(200)
+                    writeFFE1(byteArrayOf(0xF7.toByte(), 0x33.toByte()))
+                }
             }
 
             b2 == 0x33 && protocolStep == ProtocolStep.WAIT_USER_LIST -> {
@@ -647,6 +666,24 @@ class LibraSyncService : Service() {
                 Log.d(TAG, "0xE0 scale end signal step=$protocolStep")
                 when (protocolStep) {
                     ProtocolStep.GETTING_UNKNOWN, ProtocolStep.ASSIGNING_UNKNOWN -> onAllDone()
+                    ProtocolStep.WAIT_USER_LIST -> {
+                        if (getUserListRetries < 3) {
+                            getUserListRetries++
+                            Log.d(TAG, "0xE0 in WAIT_USER_LIST → retry getUserList ($getUserListRetries/3)")
+                            scope.launch {
+                                delay(500)
+                                writeFFE1(byteArrayOf(0xF7.toByte(), 0x33.toByte()))
+                            }
+                        } else {
+                            Log.d(TAG, "0xE0 in WAIT_USER_LIST → max retries reached, giving up")
+                            gatt?.disconnect()
+                            _state.value = SyncState.Error(getString(R.string.error_connection_lost))
+                        }
+                    }
+                    ProtocolStep.WAIT_SETUP -> {
+                        gatt?.disconnect()
+                        _state.value = SyncState.Error(getString(R.string.error_connection_lost))
+                    }
                     else -> {}
                 }
             }
@@ -834,9 +871,15 @@ class LibraSyncService : Service() {
     }
 
     private suspend fun sendCreateUser() {
+        val userPreferences = (application as LibraApplication).userPreferences
         val prefs = cachedPrefs
-            ?: (application as LibraApplication).userPreferences.prefs.first()
-        val userId = prefs.scaleUserId
+            ?: userPreferences.prefs.first()
+        var userId = prefs.scaleUserId
+        if (userId <= 0L) {
+            userId = (100_000_000L..999_999_999L).random()
+            userPreferences.setScaleUserId(userId)
+            cachedPrefs = prefs.copy(scaleUserId = userId)
+        }
         selectedUserId = userId
         val initials = prefs.initials.uppercase().take(3).padEnd(3, 'A')
         val actGender = prefs.activityLevel or (if (prefs.genderMale) 128 else 0)

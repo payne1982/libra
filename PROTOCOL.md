@@ -154,8 +154,12 @@ This field maps to `bodyWaterContent` in the DB (%).
    setCharacteristicNotification(FFE2, true)
    write(FFE1, {0xF6, 0x01})                    ← init
 
-2. scale responds 0xF6... → send getUserList
+2. scale responds 0xF6... → wait 200ms → send getUserList
    write(FFE1, {0xF7, 0x33})
+   **IMPORTANT:** on some Android devices the BLE stack is not ready to receive
+   notifications immediately after the 0xF6 response. Without a ~200ms delay,
+   the scale sends the 0x33/0x34 response before the app can receive it, then
+   times out after ~19 seconds and sends E0 01 instead.
 
 3. scale responds getUserList:
    - header: data[2]==0x33, data[3]=status(1=no users), data[4]=count
@@ -243,9 +247,16 @@ causes all sub-packets to be treated as "even" (idx always == total == 2) and
 ```
 [0xE0][0x01]
 ```
-Sent by the scale in `GETTING_UNKNOWN` state after `getUnknownMeasurements (0x46)` when
-**there are no unknown measurements**. Means "done, nothing more to send".
-→ Treat as sync completion (`onAllDone()`).
+The scale sends this in multiple situations:
+- After `getUnknownMeasurements (0x46)` with no unknown measurements → sync complete (`onAllDone()`)
+- During `WAIT_USER_LIST` (~19s after getUserList) → scale timed out waiting for app response.
+  This happens when the app misses the 0x33/0x34 packets (BLE timing). Retry getUserList up to
+  3 times with 500ms delay. If all retries fail → show connection error.
+- During `WAIT_SETUP` → scale timed out waiting for user action (user selection screen).
+  → Disconnect and show connection error.
+
+**Scale timeout:** ~19 seconds. If the app does not respond to a request within 19 seconds,
+the scale sends E0 01 and considers the session ended.
 
 ### 0x4D — getMeasurements retry
 ```

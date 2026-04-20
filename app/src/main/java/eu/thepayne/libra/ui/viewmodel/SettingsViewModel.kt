@@ -31,7 +31,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { prefs.setUseKg(useKg) }
 
     fun resetScaleUserId() =
-        viewModelScope.launch { prefs.setScaleUserId(1234L) }
+        viewModelScope.launch { prefs.setScaleUserId(0L) }
 
     fun setLanguageCode(code: String) = viewModelScope.launch {
         prefs.setLanguageCode(code)

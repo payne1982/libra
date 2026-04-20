@@ -292,14 +292,12 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
             }
 
             val scaleUserId = prefs.scaleUserId
-            if (scaleUserId != 1234L) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { vm.resetScaleUserId() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.btn_forget_scale_profile, scaleUserId))
-                }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                onClick = { vm.resetScaleUserId() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.btn_forget_scale_profile, scaleUserId))
             }
         }
     }

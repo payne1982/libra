@@ -25,7 +25,7 @@ data class AppPrefs(
     val birthMonth: Int = 1,
     val birthDay: Int = 1,
     val activityLevel: Int = 3,
-    val scaleUserId: Long = 1234L,
+    val scaleUserId: Long = 0L,
     val languageCode: String = "",
 )
 
@@ -58,7 +58,7 @@ class UserPreferences(private val context: Context) {
             birthMonth = p[Keys.BIRTH_MONTH] ?: 1,
             birthDay = p[Keys.BIRTH_DAY] ?: 1,
             activityLevel = p[Keys.ACTIVITY_LEVEL] ?: 3,
-            scaleUserId = p[Keys.SCALE_USER_ID] ?: 1234L,
+            scaleUserId = p[Keys.SCALE_USER_ID] ?: 0L,
             languageCode = p[Keys.LANGUAGE_CODE] ?: "",
         )
     }
