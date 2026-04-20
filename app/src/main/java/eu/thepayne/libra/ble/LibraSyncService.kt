@@ -17,6 +17,7 @@ import android.bluetooth.le.ScanSettings
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import eu.thepayne.libra.LibraApplication
 import eu.thepayne.libra.MainActivity
@@ -108,6 +109,7 @@ class LibraSyncService : Service() {
 
         private const val NOTIF_CHANNEL = "libra_sync"
         private const val NOTIF_ID = 1
+        private const val TAG = "LibraBLE"
 
         private val _state = MutableStateFlow<SyncState>(SyncState.Idle)
         val state: StateFlow<SyncState> = _state.asStateFlow()
@@ -328,13 +330,19 @@ class LibraSyncService : Service() {
             characteristic: BluetoothGattCharacteristic,
             status: Int
         ) {
-            if (status != BluetoothGatt.GATT_SUCCESS) return
+            Log.d(TAG, "onCharacteristicWrite: status=$status writeIntent=$writeIntent")
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                Log.w(TAG, "write FAILED status=$status writeIntent=$writeIntent")
+                return
+            }
             when (writeIntent) {
                 WriteIntent.SET_DATA_TIME -> {
+                    Log.d(TAG, "SET_DATA_TIME ack → sending SET_UNIT")
                     writeIntent = WriteIntent.SET_UNIT
                     writeFFE1(byteArrayOf(0xF7.toByte(), 0x4D.toByte(), 0x01.toByte()))
                 }
                 WriteIntent.SET_UNIT -> {
+                    Log.d(TAG, "SET_UNIT ack → onSetupComplete")
                     writeIntent = WriteIntent.NONE
                     onSetupComplete()
                 }
@@ -378,8 +386,10 @@ class LibraSyncService : Service() {
     // ─── Setup complete: decide il passo successivo in base alla modalità ─────
 
     private fun onSetupComplete() {
+        Log.d(TAG, "onSetupComplete: mode=$serviceMode userFound=$userFound scaleUsers=${scaleUsers.size} selectedUserId=$selectedUserId")
         when {
             !userFound && scaleUsers.isNotEmpty() -> {
+                Log.d(TAG, "→ UserSelection (${scaleUsers.size} users on scale)")
                 _state.value = SyncState.UserSelection(
                     users = scaleUsers.toList(),
                     canCreate = scaleUsers.size < 8
@@ -387,16 +397,19 @@ class LibraSyncService : Service() {
                 updateNotification("Seleziona il tuo profilo sulla bilancia…")
             }
             !userFound -> {
+                Log.d(TAG, "→ createUser (no users on scale)")
                 protocolStep = ProtocolStep.CREATING_USER
                 scope.launch { sendCreateUser() }
             }
             serviceMode == ServiceMode.SYNC -> {
+                Log.d(TAG, "→ getMeasurements for userId=$selectedUserId")
                 _state.value = SyncState.Syncing()
                 updateNotification("Scaricamento misurazioni…")
                 protocolStep = ProtocolStep.GETTING_MEASUREMENTS
                 writeFFE1(buildGetMeasurementsCmd(selectedUserId))
             }
-            else -> { // MEASURE o LIVE — invia profilo (0x31) prima di 0x40 per il body comp
+            else -> {
+                Log.d(TAG, "→ sendCreateUser (profile update before measure)")
                 protocolStep = ProtocolStep.CREATING_USER
                 scope.launch { sendCreateUser() }
             }
@@ -412,8 +425,11 @@ class LibraSyncService : Service() {
         val b2 = if (data.size > 2) data[2].toInt() and 0xFF else -1
         val b3 = if (data.size > 3) data[3].toInt() and 0xFF else -1
 
+        Log.d(TAG, "RX[${data.size}] ${data.take(6).joinToString(" ") { "%02X".format(it) }} step=$protocolStep")
+
         when {
             b0 == 0xF6 && protocolStep == ProtocolStep.INIT -> {
+                Log.d(TAG, "0xF6 init → getUserList")
                 protocolStep = ProtocolStep.WAIT_USER_LIST
                 writeFFE1(byteArrayOf(0xF7.toByte(), 0x33.toByte()))
             }
@@ -421,35 +437,39 @@ class LibraSyncService : Service() {
             b2 == 0x33 && protocolStep == ProtocolStep.WAIT_USER_LIST -> {
                 val status = b3
                 val count = if (data.size > 4) data[4].toInt() and 0xFF else 0
+                Log.d(TAG, "0x33 getUserList header: status=$status count=$count savedUserId=$selectedUserId")
                 expectedUserCount = count
                 receivedUserCount = 0
                 if (status == 1 || count == 0) {
+                    Log.d(TAG, "0x33 no users on scale → sendSetDataTime")
                     userFound = false
                     protocolStep = ProtocolStep.WAIT_SETUP
                     sendSetDataTime()
                 }
-                // If count > 0, wait for 0x34 packets to check for our userId
             }
 
             b1 == 0x34 && protocolStep == ProtocolStep.WAIT_USER_LIST -> {
-                // ACK obbligatorio: senza ACK la bilancia rimanda lo stesso utente invece del successivo
                 writeFFE1(byteArrayOf(0xF7.toByte(), 0xF1.toByte(), data[1], data[2], data[3]))
                 if (data.size >= 12) {
                     val userId = readLongBE(data, 4)
                     val initials = if (data.size >= 15) String(data.sliceArray(12..14)) else ""
+                    Log.d(TAG, "0x34 user: id=$userId initials='$initials' match=${userId == selectedUserId}")
                     if (scaleUsers.none { it.id == userId }) {
                         scaleUsers.add(ScaleUser(userId, initials))
                     }
                     if (userId == selectedUserId) userFound = true
                 }
                 receivedUserCount++
+                Log.d(TAG, "0x34 received=$receivedUserCount expected=$expectedUserCount userFound=$userFound")
                 if (receivedUserCount >= expectedUserCount) {
+                    Log.d(TAG, "0x34 all users received → sendSetDataTime (scaleUsers=${scaleUsers.size} userFound=$userFound)")
                     protocolStep = ProtocolStep.WAIT_SETUP
                     sendSetDataTime()
                 }
             }
 
             b2 == 0x32 && protocolStep == ProtocolStep.DELETING_USER -> {
+                Log.d(TAG, "0x32 deleteUser: status=$b3")
                 if (b3 == 0) {
                     val deletedId = scaleUsers.firstOrNull()?.id ?: 0L
                     scaleUsers.removeAll { it.id == deletedId }
@@ -465,6 +485,7 @@ class LibraSyncService : Service() {
             }
 
             b2 == 0x31 && protocolStep == ProtocolStep.CREATING_USER -> {
+                Log.d(TAG, "0x31 createUser: status=$b3 userFound=$userFound selectedUserId=$selectedUserId")
                 when (b3) {
                     0 -> {
                         if (serviceMode == ServiceMode.SYNC) {
@@ -476,13 +497,22 @@ class LibraSyncService : Service() {
                         }
                     }
                     1, 2, 3 -> {
-                        userFound = true
-                        if (serviceMode == ServiceMode.SYNC) {
-                            protocolStep = ProtocolStep.GETTING_MEASUREMENTS
-                            writeFFE1(buildGetMeasurementsCmd(selectedUserId))
+                        if (!userFound) {
+                            Log.d(TAG, "0x31 code=$b3 !userFound → re-request user list")
+                            protocolStep = ProtocolStep.WAIT_USER_LIST
+                            scaleUsers.clear()
+                            expectedUserCount = 0
+                            receivedUserCount = 0
+                            writeFFE1(byteArrayOf(0xF7.toByte(), 0x33.toByte()))
                         } else {
-                            protocolStep = ProtocolStep.WAIT_MEASURE
-                            writeFFE1(buildTakeMeasureCmd(selectedUserId))
+                            Log.d(TAG, "0x31 code=$b3 userFound → proceed")
+                            if (serviceMode == ServiceMode.SYNC) {
+                                protocolStep = ProtocolStep.GETTING_MEASUREMENTS
+                                writeFFE1(buildGetMeasurementsCmd(selectedUserId))
+                            } else {
+                                protocolStep = ProtocolStep.WAIT_MEASURE
+                                writeFFE1(buildTakeMeasureCmd(selectedUserId))
+                            }
                         }
                     }
                     else -> {
@@ -493,6 +523,7 @@ class LibraSyncService : Service() {
             }
 
             b2 == 0x4D && protocolStep == ProtocolStep.GETTING_MEASUREMENTS -> {
+                Log.d(TAG, "0x4D getMeasurements retry")
                 scope.launch {
                     delay(200)
                     writeFFE1(buildGetMeasurementsCmd(selectedUserId))
@@ -502,6 +533,7 @@ class LibraSyncService : Service() {
             b2 == 0x41 && protocolStep == ProtocolStep.GETTING_MEASUREMENTS -> {
                 gumTotalSubPkts = b3
                 val status = if (data.size > 4) data[4].toInt() and 0xFF else 0
+                Log.d(TAG, "0x41 getMeasurements header: subPkts=$gumTotalSubPkts status=$status")
                 gumDownloadedCount = 0
                 if (status == 1 || gumTotalSubPkts == 0) {
                     onMeasurementsDownloaded()
@@ -512,10 +544,11 @@ class LibraSyncService : Service() {
             }
 
             b1 == 0x42 && protocolStep == ProtocolStep.GETTING_MEASUREMENTS -> {
-                handleGetMeasurementSubPkt(data, b2)
+                handleGetMeasurementSubPkt(data, b3)
             }
 
             b2 == 0x40 && protocolStep == ProtocolStep.WAIT_MEASURE -> {
+                Log.d(TAG, "0x40 takeMeasure: status=$b3")
                 if (b3 == 0) {
                     protocolStep = ProtocolStep.MEASURING
                     val name = gatt?.device?.name ?: "Libra"
@@ -528,7 +561,9 @@ class LibraSyncService : Service() {
             }
 
             b2 == 0x46 && protocolStep == ProtocolStep.GETTING_UNKNOWN -> {
-                if (b3 == 1 || (data.size > 4 && data[4].toInt() and 0xFF == 0)) {
+                val count46 = if (data.size > 4) data[4].toInt() and 0xFF else 0
+                Log.d(TAG, "0x46 getUnknown header: b3=$b3 count=$count46")
+                if (b3 == 1 || count46 == 0) {
                     onAllDone()
                 }
             }
@@ -607,6 +642,15 @@ class LibraSyncService : Service() {
                 }
             }
 
+            b0 == 0xE0 -> {
+                // Scale "session end" signal — means no more data (no unknown measurements)
+                Log.d(TAG, "0xE0 scale end signal step=$protocolStep")
+                when (protocolStep) {
+                    ProtocolStep.GETTING_UNKNOWN, ProtocolStep.ASSIGNING_UNKNOWN -> onAllDone()
+                    else -> {}
+                }
+            }
+
             b0 == 0xF7 -> handleF7Packet(data, b1, b2)
 
             else -> {}
@@ -614,23 +658,26 @@ class LibraSyncService : Service() {
     }
 
     private fun handleGetMeasurementSubPkt(data: ByteArray, idx: Int) {
-        if (data.size < 14) return
+        // Format: [0xF7, 0x42, totalSubPkts, currentIdx, payload...]
+        // payload starts at data[4]
+        if (data.size < 15) return
         writeFFE1(byteArrayOf(0xF7.toByte(), 0xF1.toByte(), data[1], data[2], data[3]))
+        Log.d(TAG, "0x42 sub[$idx/${gumTotalSubPkts}] raw: ${data.drop(4).take(11).joinToString(" ") { "%02X".format(it) }}")
 
         if (idx % 2 == 1) {
-            gumCurrentTs = readIntBE(data, 3)
-            gumCurrentWeight = readShortBE(data, 7) / 20f
-            gumCurrentImpedance = readShortBE(data, 9)
-            gumCurrentBodyFat = readShortBE(data, 11) / 10f
-            gumBoneMsb = data[13].toInt() and 0xFF
+            gumCurrentTs = readIntBE(data, 4)
+            gumCurrentWeight = readShortBE(data, 8) / 20f
+            gumCurrentImpedance = readShortBE(data, 10)
+            gumCurrentBodyFat = readShortBE(data, 12) / 10f
+            gumBoneMsb = data[14].toInt() and 0xFF
         } else {
-            val boneLsb = data[3].toInt() and 0xFF
+            val boneLsb = data[4].toInt() and 0xFF
             val bodyWaterPct = ((boneLsb) or (gumBoneMsb shl 8)) / 10f
-            val musclePct = readShortBE(data, 4) / 10f
-            val boneMassKg = readShortBE(data, 6) / 20f
-            val bmr = readShortBE(data, 8)
-            val amr = readShortBE(data, 10)
-            val bmi = readShortBE(data, 12) / 10f
+            val musclePct = readShortBE(data, 5) / 10f
+            val boneMassKg = readShortBE(data, 7) / 20f
+            val bmr = readShortBE(data, 9)
+            val amr = readShortBE(data, 11)
+            val bmi = readShortBE(data, 13) / 10f
             val entity = MeasurementEntity(
                 timestampMs = gumCurrentTs * 1000L,
                 weightKg = gumCurrentWeight,
@@ -659,7 +706,8 @@ class LibraSyncService : Service() {
         updateNotification("Scaricamento $idx/$gumTotalSubPkts sub-pacchetti…")
 
         if (idx == gumTotalSubPkts) {
-            onMeasurementsDownloaded()
+            // Delay to let the ACK write complete before sending 0x46
+            scope.launch { delay(100); onMeasurementsDownloaded() }
         }
     }
 
@@ -778,6 +826,7 @@ class LibraSyncService : Service() {
 
     private fun sendSetDataTime() {
         val ts = (System.currentTimeMillis() / 1000).toInt()
+        Log.d(TAG, "sendSetDataTime ts=$ts")
         val cmd = byteArrayOf(0xF9.toByte(),
             (ts ushr 24).toByte(), (ts ushr 16).toByte(), (ts ushr 8).toByte(), ts.toByte())
         writeIntent = WriteIntent.SET_DATA_TIME
