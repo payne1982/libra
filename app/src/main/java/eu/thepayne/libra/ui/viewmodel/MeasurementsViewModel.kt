@@ -48,6 +48,9 @@ class MeasurementsViewModel(app: Application) : AndroidViewModel(app) {
 
     fun delete(id: Long) = viewModelScope.launch { repo.deleteById(id) }
 
+    fun insertManual(entity: eu.thepayne.libra.data.db.MeasurementEntity) =
+        viewModelScope.launch { repo.insert(entity) }
+
     private val _importResult = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val importResult: SharedFlow<Int> = _importResult.asSharedFlow()
 

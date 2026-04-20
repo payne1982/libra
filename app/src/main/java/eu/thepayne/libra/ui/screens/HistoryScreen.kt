@@ -17,16 +17,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -57,7 +60,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(vm: MeasurementsViewModel = viewModel()) {
+fun HistoryScreen(onAddManual: () -> Unit = {}, vm: MeasurementsViewModel = viewModel()) {
     val measurements by vm.allMeasurements.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -78,31 +81,38 @@ fun HistoryScreen(vm: MeasurementsViewModel = viewModel()) {
         }
     }
 
-    Column(Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.history_title)) },
-            actions = {
-                IconButton(onClick = {
-                    scope.launch { ImportExport.exportJson(context, measurements) }
-                }) { Icon(Icons.Default.FileUpload, stringResource(R.string.cd_export_json)) }
-                IconButton(onClick = {
-                    scope.launch { ImportExport.exportCsv(context, measurements) }
-                }) { Icon(Icons.Default.FileUpload, stringResource(R.string.cd_export_csv)) }
-                IconButton(onClick = {
-                    importLauncher.launch(arrayOf("application/json", "text/csv", "*/*"))
-                }) { Icon(Icons.Default.FileDownload, stringResource(R.string.cd_import)) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.history_title)) },
+                actions = {
+                    IconButton(onClick = {
+                        scope.launch { ImportExport.exportJson(context, measurements) }
+                    }) { Icon(Icons.Default.FileUpload, stringResource(R.string.cd_export_json)) }
+                    IconButton(onClick = {
+                        scope.launch { ImportExport.exportCsv(context, measurements) }
+                    }) { Icon(Icons.Default.FileUpload, stringResource(R.string.cd_export_csv)) }
+                    IconButton(onClick = {
+                        importLauncher.launch(arrayOf("application/json", "text/csv", "*/*"))
+                    }) { Icon(Icons.Default.FileDownload, stringResource(R.string.cd_import)) }
+                }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddManual) {
+                Icon(Icons.Default.Add, stringResource(R.string.cd_add_entry))
             }
-        )
-
+        }
+    ) { innerPadding ->
         if (measurements.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.history_empty),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
             ) {

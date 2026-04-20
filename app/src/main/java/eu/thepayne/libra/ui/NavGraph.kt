@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Icon
@@ -16,16 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import eu.thepayne.libra.R
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import eu.thepayne.libra.R
 import eu.thepayne.libra.ui.screens.ChartScreen
 import eu.thepayne.libra.ui.screens.HistoryScreen
 import eu.thepayne.libra.ui.screens.LiveWeightScreen
+import eu.thepayne.libra.ui.screens.ManualEntryScreen
 import eu.thepayne.libra.ui.screens.SettingsScreen
 import eu.thepayne.libra.ui.screens.SyncScreen
 
@@ -35,6 +35,7 @@ sealed class Screen(val route: String) {
     data object Sync : Screen("sync")
     data object LiveWeight : Screen("live_weight")
     data object Settings : Screen("settings")
+    data object ManualEntry : Screen("manual_entry")
 }
 
 @Composable
@@ -50,7 +51,8 @@ fun NavGraph() {
         Triple(Screen.Settings, Icons.Default.Settings, stringResource(R.string.nav_settings)),
     )
 
-    val showBottomBar = currentDestination?.route != Screen.LiveWeight.route
+    val noBottomBarRoutes = setOf(Screen.LiveWeight.route, Screen.ManualEntry.route)
+    val showBottomBar = currentDestination?.route !in noBottomBarRoutes
 
     Scaffold(
         bottomBar = {
@@ -81,7 +83,9 @@ fun NavGraph() {
             startDestination = Screen.History.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.History.route) { HistoryScreen() }
+            composable(Screen.History.route) {
+                HistoryScreen(onAddManual = { navController.navigate(Screen.ManualEntry.route) })
+            }
             composable(Screen.Chart.route) { ChartScreen() }
             composable(Screen.Sync.route) {
                 SyncScreen(onOpenLiveWeight = { navController.navigate(Screen.LiveWeight.route) })
@@ -90,6 +94,9 @@ fun NavGraph() {
                 LiveWeightScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.ManualEntry.route) {
+                ManualEntryScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 }

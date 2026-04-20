@@ -133,6 +133,24 @@
     <string name="status_connecting_short">Connecting…</string>
     <string name="status_step_on_scale">Step on the scale</string>
 
+    <!-- Manual entry screen -->
+    <string name="manual_entry_title">New entry</string>
+    <string name="field_date">Date</string>
+    <string name="field_time">Time</string>
+    <string name="field_weight_required">Weight (kg) *</string>
+    <string name="section_body_comp_optional">Body composition (optional)</string>
+    <string name="field_fat_pct">Fat (%)</string>
+    <string name="field_fat_kg">Fat mass (kg)</string>
+    <string name="field_muscle_pct">Muscle (%)</string>
+    <string name="field_muscle_kg">Muscle mass (kg)</string>
+    <string name="field_bone_kg">Bone mass (kg)</string>
+    <string name="field_water_pct">Body water (%)</string>
+    <string name="field_bmr">BMR (kcal)</string>
+    <string name="field_amr">AMR (kcal)</string>
+    <string name="field_impedance_ohm">Impedance (Ω)</string>
+    <string name="error_weight_required">Weight is required</string>
+    <string name="cd_add_entry">Add entry</string>
+
     <!-- Language settings -->
     <string name="settings_language">Language</string>
     <string name="language_system">System default</string>

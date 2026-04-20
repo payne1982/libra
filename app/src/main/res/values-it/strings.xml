@@ -133,6 +133,24 @@
     <string name="status_connecting_short">Connessione…</string>
     <string name="status_step_on_scale">Sali sulla bilancia</string>
 
+    <!-- Manual entry screen -->
+    <string name="manual_entry_title">Nuova misurazione</string>
+    <string name="field_date">Data</string>
+    <string name="field_time">Ora</string>
+    <string name="field_weight_required">Peso (kg) *</string>
+    <string name="section_body_comp_optional">Composizione corporea (opzionale)</string>
+    <string name="field_fat_pct">Grasso (%)</string>
+    <string name="field_fat_kg">Massa grassa (kg)</string>
+    <string name="field_muscle_pct">Muscoli (%)</string>
+    <string name="field_muscle_kg">Massa muscolare (kg)</string>
+    <string name="field_bone_kg">Massa ossea (kg)</string>
+    <string name="field_water_pct">Acqua corporea (%)</string>
+    <string name="field_bmr">BMR (kcal)</string>
+    <string name="field_amr">AMR (kcal)</string>
+    <string name="field_impedance_ohm">Impedenza (Ω)</string>
+    <string name="error_weight_required">Il peso è obbligatorio</string>
+    <string name="cd_add_entry">Aggiungi misurazione</string>
+
     <!-- Language settings -->
     <string name="settings_language">Lingua</string>
     <string name="language_system">Predefinito di sistema</string>
