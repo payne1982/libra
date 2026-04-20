@@ -16,6 +16,7 @@
     <string name="notification_step_on_scale">Step on the scale…</string>
     <string name="notification_select_profile">Select your profile on the scale…</string>
     <string name="status_creating_profile">Creating profile…</string>
+    <string name="toast_saved">Saved</string>
 
     <!-- Common -->
     <string name="btn_cancel">Cancel</string>
@@ -84,6 +85,8 @@
     <string name="metric_amr">AMR</string>
     <string name="metric_impedance">Impedance</string>
     <string name="cd_delete">Delete</string>
+    <string name="cd_copy">Copy</string>
+    <string name="toast_copied">Copied to clipboard</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Settings</string>

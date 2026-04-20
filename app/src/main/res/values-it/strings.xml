@@ -16,6 +16,7 @@
     <string name="notification_step_on_scale">Sali sulla bilancia…</string>
     <string name="notification_select_profile">Seleziona il tuo profilo sulla bilancia…</string>
     <string name="status_creating_profile">Creazione profilo…</string>
+    <string name="toast_saved">Salvato</string>
 
     <!-- Common -->
     <string name="btn_cancel">Annulla</string>
@@ -84,6 +85,8 @@
     <string name="metric_amr">AMR</string>
     <string name="metric_impedance">Impedenza</string>
     <string name="cd_delete">Elimina</string>
+    <string name="cd_copy">Copia</string>
+    <string name="toast_copied">Copiato negli appunti</string>
 
     <!-- Settings screen -->
     <string name="settings_title">Impostazioni</string>

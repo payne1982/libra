@@ -1,5 +1,8 @@
 package eu.thepayne.libra.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
@@ -121,7 +125,12 @@ fun HistoryScreen(onAddManual: () -> Unit = {}, vm: MeasurementsViewModel = view
                         m = m,
                         expanded = expandedId == m.id,
                         onClick = { expandedId = if (expandedId == m.id) -1L else m.id },
-                        onDelete = { confirmDeleteId = m.id }
+                        onDelete = { confirmDeleteId = m.id },
+                        onCopy = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("measurement", it))
+                            Toast.makeText(context, context.getString(R.string.toast_copied), Toast.LENGTH_SHORT).show()
+                        }
                     )
                 }
             }
@@ -153,7 +162,8 @@ private fun MeasurementCard(
     m: MeasurementEntity,
     expanded: Boolean,
     onClick: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onCopy: (String) -> Unit
 ) {
     val fmt = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     Card(
@@ -175,9 +185,17 @@ private fun MeasurementCard(
                     Text(stringResource(R.string.label_fat_muscle, m.bodyFatPct, m.musclePct),
                         style = MaterialTheme.typography.bodyMedium)
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, stringResource(R.string.cd_delete),
-                        tint = MaterialTheme.colorScheme.error)
+                Row {
+                    if (expanded) {
+                        val copyText = buildCopyText(m, fmt)
+                        IconButton(onClick = { onCopy(copyText) }) {
+                            Icon(Icons.Default.ContentCopy, stringResource(R.string.cd_copy))
+                        }
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(Icons.Default.Delete, stringResource(R.string.cd_delete),
+                            tint = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
 
@@ -192,12 +210,25 @@ private fun MeasurementCard(
                     "%.2f kg".format(m.boneMassKg))
                 MetricRow(stringResource(R.string.metric_body_water),
                     "%.1f%%".format(m.bodyWaterPct))
-                MetricRow(stringResource(R.string.metric_bmr), "${m.bmr} kcal/g")
-                MetricRow(stringResource(R.string.metric_amr), "${m.amr} kcal/g")
+                MetricRow(stringResource(R.string.metric_bmr), "${m.bmr} kcal/day")
+                MetricRow(stringResource(R.string.metric_amr), "${m.amr} kcal/day")
                 MetricRow(stringResource(R.string.metric_impedance), "${m.impedanceOhm} Ω")
             }
         }
     }
+}
+
+private fun buildCopyText(m: MeasurementEntity, fmt: SimpleDateFormat): String = buildString {
+    appendLine(fmt.format(Date(m.timestampMs)))
+    appendLine("Weight:      %.1f kg".format(m.weightKg))
+    appendLine("BMI:         %.1f".format(m.bmi))
+    appendLine("Fat:         %.1f%%  (%.2f kg)".format(m.bodyFatPct, m.bodyFatKg))
+    appendLine("Muscle:      %.1f%%  (%.2f kg)".format(m.musclePct, m.muscleMassKg))
+    appendLine("Bone:        %.2f kg".format(m.boneMassKg))
+    appendLine("Body water:  %.1f%%".format(m.bodyWaterPct))
+    appendLine("BMR:         ${m.bmr} kcal/day")
+    appendLine("AMR:         ${m.amr} kcal/day")
+    append("Impedance:   ${m.impedanceOhm} Ω")
 }
 
 @Composable

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,10 +23,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import eu.thepayne.libra.R
 import eu.thepayne.libra.ui.viewmodel.SettingsViewModel
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 private data class LanguageOption(val code: String, @StringRes val labelRes: Int)
 private val languageOptions = listOf(
@@ -60,6 +67,9 @@ private val languageOptions = listOf(
 fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
     val prefs by vm.appPrefs.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val savedMsg = stringResource(R.string.toast_saved)
 
     LaunchedEffect(Unit) {
         vm.restartTrigger.collect { (context as Activity).recreate() }
@@ -76,16 +86,21 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
     var birthDayText by remember(prefs.birthDay) { mutableStateOf(prefs.birthDay.toString()) }
     var activitySlider by remember(prefs.activityLevel) { mutableFloatStateOf(prefs.activityLevel.toFloat()) }
 
-    Column(Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(stringResource(R.string.settings_title)) })
-
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.settings_title)) }) },
+        snackbarHost = { SnackbarHost(snackbarHostState) { Snackbar(it) } }
+    ) { innerPadding ->
         Column(
             Modifier
-                .padding(16.dp)
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .imePadding()
         ) {
+            Spacer(Modifier.height(8.dp))
 
-            // ── Lingua ───────────────────────────────────────────────────────────
+            // ── Language ─────────────────────────────────────────────────────────
             Text(stringResource(R.string.settings_language),
                 style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
@@ -127,7 +142,7 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
 
             HorizontalDivider(Modifier.padding(vertical = 20.dp))
 
-            // ── Filtro peso ───────────────────────────────────────────────────
+            // ── Weight filter ─────────────────────────────────────────────────
             Text(stringResource(R.string.settings_weight_filter),
                 style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
@@ -161,7 +176,10 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
                 onClick = {
                     val min = minText.replace(",", ".").toFloatOrNull() ?: return@Button
                     val max = maxText.replace(",", ".").toFloatOrNull() ?: return@Button
-                    if (min < max) vm.setWeightRange(min, max)
+                    if (min < max) {
+                        vm.setWeightRange(min, max)
+                        scope.launch { snackbarHostState.showSnackbar(savedMsg) }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -285,6 +303,7 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
                     val day = birthDayText.toIntOrNull()?.coerceIn(1, 31) ?: return@Button
                     val activity = activitySlider.roundToInt().coerceIn(1, 5)
                     vm.setUserProfile(initials, height, genderMale, year, month, day, activity)
+                    scope.launch { snackbarHostState.showSnackbar(savedMsg) }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -299,6 +318,8 @@ fun SettingsScreen(vm: SettingsViewModel = viewModel()) {
             ) {
                 Text(stringResource(R.string.btn_forget_scale_profile, scaleUserId))
             }
+
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
