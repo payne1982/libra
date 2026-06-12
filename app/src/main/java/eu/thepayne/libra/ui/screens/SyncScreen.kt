@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -133,9 +134,13 @@ fun SyncScreen(
 
                         HorizontalDivider(Modifier.padding(vertical = 4.dp))
 
-                        OutlinedButton(
+                        Button(
                             onClick = { measurePermissionsLauncher.launch(requiredPermissions()) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )
                         ) {
                             Text(stringResource(R.string.btn_new_measurement))
                         }
